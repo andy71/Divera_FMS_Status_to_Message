@@ -1,0 +1,12 @@
+{
+    "api_key": "YOUR-API-KEY",
+    "sender_email": "sender@example.de",
+    "receiver_emails": [
+        "reciver1@example.de",
+        "reciver2@example.de"
+    ],
+    "email_password": "YOUR-EMAIL-PASSWORD",
+    "status_dict": {
+        
+    }
+}
