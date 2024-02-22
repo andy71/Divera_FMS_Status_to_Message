@@ -1,4 +1,5 @@
 {
+    "_comment": "Diese Datei bitte kopieren und entsprechend anpassen bzw. ausfüllen. STATUS_DICT bitte nicht ändern. Anschließend die datei in config.json umbenennen!",
     "api_key": "YOUR-API-KEY",
     "sender_email": "sender@example.de",
     "receiver_emails": [
