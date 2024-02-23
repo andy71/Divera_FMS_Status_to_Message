@@ -13,15 +13,24 @@ def load_config():
         print("Bitte erstellen Sie eine Konfigurationsdatei mit den erforderlichen Informationen.")
         print("Ein Beispiel für die Konfigurationsdatei könnte wie folgt aussehen:")
         print("{")
-        print("    \"api_key\": \"YOUR_API_KEY\",")
-        print("    \"sender_email\": \"YOUR_EMAIL\",")
-        print("    \"receiver_emails\": [\"RECEIVER_EMAIL_1\", \"RECEIVER_EMAIL_2\"],")
-        print("    \"email_password\": \"YOUR_EMAIL_PASSWORD\"")
+        print("    \"api_key\": \"YOUR-API-KEY\",")
+        print("    \"sender_email\": \"sender@example.de\",")
+        print("    \"email_password\": \"YOUR-EMAIL-PASSWORD\",")
+        print("    \"smtp_server\": \"smtp.gmail.com\",")
+        print("    \"smtp_port\": 465,")
+        print("    \"receiver_emails\": [")
+        print("        \"reciver1@example.de\",")
+        print("        \"reciver2@example.de\"")
+        print("    ],")
+        print("    \"status_dict\": {")
+        print("        ")
+        print("    }")
         print("}")
         exit(1)  # Beenden des Skripts mit Fehlercode 1
     with open(CONFIG_FILE) as f:
         config = json.load(f)
     return config
+
 
 def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
