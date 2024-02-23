@@ -3,10 +3,22 @@ import json
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import os
 
 CONFIG_FILE = 'config.json'
 
 def load_config():
+    if not os.path.exists(CONFIG_FILE):
+        print(f"Die Konfigurationsdatei '{CONFIG_FILE}' existiert nicht.")
+        print("Bitte erstellen Sie eine Konfigurationsdatei mit den erforderlichen Informationen.")
+        print("Ein Beispiel für die Konfigurationsdatei könnte wie folgt aussehen:")
+        print("{")
+        print("    \"api_key\": \"YOUR_API_KEY\",")
+        print("    \"sender_email\": \"YOUR_EMAIL\",")
+        print("    \"receiver_emails\": [\"RECEIVER_EMAIL_1\", \"RECEIVER_EMAIL_2\"],")
+        print("    \"email_password\": \"YOUR_EMAIL_PASSWORD\"")
+        print("}")
+        exit(1)  # Beenden des Skripts mit Fehlercode 1
     with open(CONFIG_FILE) as f:
         config = json.load(f)
     return config
@@ -15,7 +27,7 @@ def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
         json.dump(config, f, indent=4)
 
-def send_email(content, sender_email, receiver_emails, password):
+def send_email(content, sender_email, receiver_emails, password, smtp_server, smtp_port):
     # E-Mail Inhalt erstellen
     msg = MIMEMultipart()
     msg['From'] = sender_email
@@ -27,7 +39,7 @@ def send_email(content, sender_email, receiver_emails, password):
 
     # E-Mail Server einrichten und verbinden
     try:
-        server = smtplib.SMTP_SSL('smtp.ionos.de', 465)
+        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
         server.ehlo()
         server.login(sender_email, password)
 
@@ -53,6 +65,8 @@ def main():
     sender_email = config["sender_email"]
     receiver_emails = config["receiver_emails"]
     password = config["email_password"]
+    smtp_server = config["smtp_server"]
+    smtp_port = config["smtp_port"]
 
     url = f"https://app.divera247.com/api/v2/pull/vehicle-status?accesskey={api_key}"
 
@@ -74,13 +88,13 @@ def main():
                     print("ID wurde hinzugefügt. Aktueller status_dict:", status_dict)
                 else:
                     # Wenn sich der Status von 6 auf 2 oder von 2 auf 6 ändert, sende eine E-Mail und aktualisiere den Status
-                    if (status_dict[id] == 6 and fmsstatus == 2) or (status_dict[id] == 2 and fmsstatus == 6):
+                    if (status_dict[id] == 6 and fmsstatus != 6) or (status_dict[id] != 6 and fmsstatus == 6):
                         if status_dict[id] == 6:
                             message = f"Ein Fahrzeug ({shortname}) ist jetzt wieder einsatzbereit. \nID: {id},\n Fahrzeugname: {fullname},\n Kurzname: {shortname},\n FMS Status: {fmsstatus}\n"
                         else:
-                            message = f"Ein Fahrzeug ({shortname}) ist aktuell nicht Einsatzbereit. \nID: {id},\n Fahrzeugname: {fullname},\n Kurzname: {shortname},\n FMS Status: {fmsstatus}\n"
+                            message = f"Ein Fahrzeug ({shortname}) ist aktuell nicht einsatzbereit. \nID: {id},\n Fahrzeugname: {fullname},\n Kurzname: {shortname},\n FMS Status: {fmsstatus}\n"
                         # E-Mail senden
-                        send_email(message, sender_email, receiver_emails, password)
+                        send_email(message, sender_email, receiver_emails, password, smtp_server, smtp_port)
                     # Aktualisiere den Status für die ID
                     status_dict[id] = fmsstatus
 
