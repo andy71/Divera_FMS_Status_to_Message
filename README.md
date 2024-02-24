@@ -4,11 +4,6 @@ Dieses Python Script sendet eine Email an eine Empfängerliste wenn der Status s
 
 Bitte kopiert euch die config-example.json zu config.json und passt die Parameter an.
 
-Wenn ihr das Script per Cronjob alle X Minuten starten wollt müsst ihr im "main.py" den Pfad für die Config.json Datei auf einen Absoluten Pfad anpassen. Beispiel:
-CONFIG_FILE = 'config.json'
----->
-CONFIG_FILE = '/home/pi/Divera_FMS/config.json'
-
 Beispiel Config:
 
 {
@@ -23,7 +18,6 @@ Beispiel Config:
         "reciver2@example.de"
     ],
     "status_dict": {
-        
     }
 }
 

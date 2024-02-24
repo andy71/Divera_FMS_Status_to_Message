@@ -4,8 +4,11 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import os
+from datetime import datetime
 
-CONFIG_FILE = 'config.json'
+# Erhalte den absoluten Pfad zur aktuellen Datei
+current_directory = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(current_directory, 'config.json')
 
 def load_config():
     if not os.path.exists(CONFIG_FILE):
@@ -55,15 +58,15 @@ def send_email(content, sender_email, receiver_emails, password, smtp_server, sm
         # E-Mail senden
         text = msg.as_string()
         server.sendmail(sender_email, receiver_emails, text)
-        print("E-Mail erfolgreich gesendet!")
+        print(f"E-Mail erfolgreich gesendet! Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     except smtplib.SMTPAuthenticationError as auth_error:
-        print("Fehler: Authentifizierung fehlgeschlagen. Stelle sicher, dass Benutzername und Passwort korrekt sind.")
+        print(f"Fehler: Authentifizierung fehlgeschlagen. Stelle sicher, dass Benutzername und Passwort korrekt sind. Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("Details:", auth_error)
     except smtplib.SMTPException as smtp_error:
-        print("Fehler beim Senden der E-Mail.")
+        print(f"Fehler beim Senden der E-Mail. Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("Details:", smtp_error)
     except Exception as e:
-        print("Ein allgemeiner Fehler ist aufgetreten:", e)
+        print(f"Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Ein allgemeiner Fehler ist aufgetreten:", e)
     finally:
         if 'server' in locals():
             server.quit()
@@ -112,7 +115,7 @@ def main():
         save_config(config)
 
     except Exception as e:
-        print("Fehler beim Abrufen der Daten oder beim Senden der E-Mail:", e)
+        print(f"Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Fehler beim Abrufen der Daten oder beim Senden der E-Mail:", e)
 
 if __name__ == "__main__":
     main()
