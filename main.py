@@ -44,7 +44,7 @@ def send_email(content, sender_email, receiver_emails, password, smtp_server, sm
     msg = MIMEMultipart()
     msg['From'] = sender_email
     msg['To'] = ", ".join(receiver_emails)
-    msg['Subject'] = "Änderung Fahrzeugstatus"
+    msg['Subject'] = "Änderung Fahrzeugstatus!"
 
     body = content
     msg.attach(MIMEText(body, 'plain'))
@@ -71,15 +71,30 @@ def send_email(content, sender_email, receiver_emails, password, smtp_server, sm
         if 'server' in locals():
             server.quit()
 
+def push(message_titel, message_text, message_api, message_users, message_rics):
+    if message_users != "":
+        message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&person={message_users}&accesskey={message_api}"
+        urllib.request.urlopen(message_url)
+    else:
+        print("Keine Divera User angegeben. Push wird nicht versendet.")
+    if message_rics != "":
+        message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&ric={message_rics}&accesskey={message_api}"
+        urllib.request.urlopen(message_url)
+    else:
+        print("Keine Divera Rics angegeben. Push wird nicht versendet.")
+
 def main():
     config = load_config()
     api_key = config["api_key"]
+    message_api = config["message_api"]
+    message_users = config["message_users"]
+    message_rics = config["message_rics"]
     sender_email = config["sender_email"]
     receiver_emails = config["receiver_emails"]
     password = config["email_password"]
     smtp_server = config["smtp_server"]
     smtp_port = config["smtp_port"]
-
+    message_titel = "Änderung Fahrzeugstatus!"
     url = f"https://app.divera247.com/api/v2/pull/vehicle-status?accesskey={api_key}"
 
     # Status jeder ID speichern
@@ -93,7 +108,7 @@ def main():
                 fullname = item["fullname"]
                 shortname = item["shortname"]
                 fmsstatus = item["fmsstatus"]
-                
+
                 # Wenn die ID noch nicht im status_dict ist, füge sie hinzu
                 if id not in status_dict:
                     status_dict[id] = fmsstatus
@@ -105,8 +120,15 @@ def main():
                             message = f"Ein Fahrzeug ({shortname}) ist jetzt wieder einsatzbereit. \nID: {id},\n Fahrzeugname: {fullname},\n Kurzname: {shortname},\n FMS Status: {fmsstatus}\n"
                         else:
                             message = f"Ein Fahrzeug ({shortname}) ist aktuell nicht einsatzbereit. \nID: {id},\n Fahrzeugname: {fullname},\n Kurzname: {shortname},\n FMS Status: {fmsstatus}\n"
+
                         # E-Mail senden
-                        send_email(message, sender_email, receiver_emails, password, smtp_server, smtp_port)
+                        if receiver_emails:
+                            # E-Mail senden
+                            send_email(message, sender_email, receiver_emails, password, smtp_server, smtp_port)
+                        else:
+                            print("Keine Empfänger-E-Mail-Adressen angegeben. E-Mail wird nicht versendet.")
+                        # Pushnachricht senden
+                        push(message_titel, message, message_api,message_users,message_rics)
                     # Aktualisiere den Status für die ID
                     status_dict[id] = fmsstatus
 
@@ -119,4 +141,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print("Script erfolgreich ausgeführt!")
+    print(f"Script erfolgreich ausgeführt! Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
