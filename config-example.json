@@ -9,7 +9,6 @@
         "reciver1@example.de",
         "reciver2@example.de"
     ],
-    "message_api": "API KEY",
     "message_users": "22053,22055",
     "message_rics": "99,98,97",
     "status_dict": {

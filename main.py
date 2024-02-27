@@ -25,6 +25,8 @@ def load_config():
         print("        \"reciver1@example.de\",")
         print("        \"reciver2@example.de\"")
         print("    ],")
+        print("    \"message_users\": \"22053,22054\",")
+        print("    \"message_rics\": \"22,23\",")
         print("    \"status_dict\": {")
         print("        ")
         print("    }")
@@ -71,14 +73,14 @@ def send_email(content, sender_email, receiver_emails, password, smtp_server, sm
         if 'server' in locals():
             server.quit()
 
-def push(message_titel, message_text, message_api, message_users, message_rics):
+def push(message_titel, message_text, api_key, message_users, message_rics):
     if message_users != "":
-        message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&person={message_users}&accesskey={message_api}"
+        message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&person={message_users}&accesskey={api_key}"
         urllib.request.urlopen(message_url)
     else:
         print("Keine Divera User angegeben. Push wird nicht versendet.")
     if message_rics != "":
-        message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&ric={message_rics}&accesskey={message_api}"
+        message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&ric={message_rics}&accesskey={api_key}"
         urllib.request.urlopen(message_url)
     else:
         print("Keine Divera Rics angegeben. Push wird nicht versendet.")
@@ -86,7 +88,6 @@ def push(message_titel, message_text, message_api, message_users, message_rics):
 def main():
     config = load_config()
     api_key = config["api_key"]
-    message_api = config["message_api"]
     message_users = config["message_users"]
     message_rics = config["message_rics"]
     sender_email = config["sender_email"]
@@ -128,7 +129,7 @@ def main():
                         else:
                             print("Keine Empfänger-E-Mail-Adressen angegeben. E-Mail wird nicht versendet.")
                         # Pushnachricht senden
-                        push(message_titel, message, message_api,message_users,message_rics)
+                        push(message_titel, message, api_key,message_users,message_rics)
                     # Aktualisiere den Status für die ID
                     status_dict[id] = fmsstatus
 
