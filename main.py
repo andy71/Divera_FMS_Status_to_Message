@@ -73,7 +73,7 @@ def send_email(content, sender_email, receiver_emails, password, smtp_server, sm
         if 'server' in locals():
             server.quit()
 
-def push(message_titel, message_text, api_key, message_users_fremdschluessel, message_rics):
+def send_push(message_titel, message_text, api_key, message_users_fremdschluessel, message_rics):
     if message_users_fremdschluessel != "":
         message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&person={message_users_fremdschluessel}&accesskey={api_key}"
         urllib.request.urlopen(message_url)
@@ -131,7 +131,7 @@ def main():
                         else:
                             print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Keine Empfänger-E-Mail-Adressen angegeben. E-Mail wird nicht versendet.")
                         # Pushnachricht senden
-                        push(message_titel, message, api_key,message_users_fremdschluessel,message_rics)
+                        send_push(message_titel, message, api_key,message_users_fremdschluessel,message_rics)
                     # Aktualisiere den Status für die ID
                     status_dict[id] = fmsstatus
 
