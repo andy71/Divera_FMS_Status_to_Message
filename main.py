@@ -45,12 +45,12 @@ def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
         json.dump(config, f, indent=4)
 
-def send_email(content, sender_email, receiver_emails, password, smtp_server, smtp_port):
+def send_email(content,shortname, sender_email, receiver_emails, password, smtp_server, smtp_port):
     # E-Mail Inhalt erstellen
     msg = MIMEMultipart()
     msg['From'] = sender_email
     msg['To'] = ", ".join(receiver_emails)
-    msg['Subject'] = "Änderung Fahrzeugstatus!"
+    msg['Subject'] = "Änderung Fahrzeugstatus " + shortname + "!"
 
     body = content
     msg.attach(MIMEText(body, 'plain'))
@@ -77,7 +77,8 @@ def send_email(content, sender_email, receiver_emails, password, smtp_server, sm
         if 'server' in locals():
             server.quit()
 
-def send_push(message_titel, message_text, api_key, message_users_fremdschluessel, message_rics):
+def send_push(shortname, message_text, api_key, message_users_fremdschluessel, message_rics):
+    message_titel = "Änderung Fahrzeugstatus " + shortname + "!"
     if message_users_fremdschluessel != "":
         message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&person={message_users_fremdschluessel}&accesskey={api_key}"
         urllib.request.urlopen(message_url)
@@ -101,7 +102,6 @@ def main():
     password = config["email_password"]
     smtp_server = config["smtp_server"]
     smtp_port = config["smtp_port"]
-    message_titel = "Änderung Fahrzeugstatus!"
     url = f"https://app.divera247.com/api/v2/pull/vehicle-status?accesskey={api_key}"
 
     logger.info("Skript gestartet.")
@@ -133,11 +133,11 @@ def main():
                         # E-Mail senden
                         if receiver_emails:
                             # E-Mail senden
-                            send_email(message, sender_email, receiver_emails, password, smtp_server, smtp_port)
+                            send_email(message, shortname, sender_email, receiver_emails, password, smtp_server, smtp_port)
                         else:
                             logger.info("Keine Empfänger-E-Mail-Adressen angegeben. E-Mail wird nicht versendet.")
                         # Pushnachricht senden
-                        send_push(message_titel, message, api_key,message_users_fremdschluessel,message_rics)
+                        send_push(shortname, message, api_key,message_users_fremdschluessel,message_rics)
                     # Aktualisiere den Status für die ID
                     status_dict[id] = fmsstatus
 
