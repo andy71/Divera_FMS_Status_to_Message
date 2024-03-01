@@ -5,7 +5,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import os
 from datetime import datetime
+import logging
 
+# Logger konfigurieren
+logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
 # Erhalte den absoluten Pfad zur aktuellen Datei
 current_directory = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(current_directory, 'config.json')
@@ -60,15 +64,15 @@ def send_email(content, sender_email, receiver_emails, password, smtp_server, sm
         # E-Mail senden
         text = msg.as_string()
         server.sendmail(sender_email, receiver_emails, text)
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | E-Mail erfolgreich gesendet!")
+        logger.info("E-Mail erfolgreich gesendet!")
     except smtplib.SMTPAuthenticationError as auth_error:
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Fehler: Authentifizierung fehlgeschlagen. Stelle sicher, dass Benutzername und Passwort korrekt sind.")
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Details:", auth_error)
+        logger.error("Fehler: Authentifizierung fehlgeschlagen. Stelle sicher, dass Benutzername und Passwort korrekt sind.")
+        logger.error("Details: %s", auth_error)
     except smtplib.SMTPException as smtp_error:
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Fehler beim Senden der E-Mail.")
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Details:", smtp_error)
+        logger.error("Fehler beim Senden der E-Mail.")
+        logger.error("Details: %s", smtp_error)
     except Exception as e:
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Ein allgemeiner Fehler ist aufgetreten:", e)
+        logger.error("Ein allgemeiner Fehler ist aufgetreten:", e)
     finally:
         if 'server' in locals():
             server.quit()
@@ -77,15 +81,15 @@ def send_push(message_titel, message_text, api_key, message_users_fremdschluesse
     if message_users_fremdschluessel != "":
         message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&person={message_users_fremdschluessel}&accesskey={api_key}"
         urllib.request.urlopen(message_url)
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Mitteilung erfolgreich versendet.")
+        logger.info("Mitteilung erfolgreich versendet.")
     else:
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Keine Divera User angegeben. Mitteilung wird nicht versendet.")
+        logger.info("Keine Divera User angegeben. Mitteilung wird nicht versendet.")
     if message_rics != "":
         message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&ric={message_rics}&accesskey={api_key}"
         urllib.request.urlopen(message_url)
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Mitteilung erfolgreich versendet.")
+        logger.info("Mitteilung erfolgreich versendet.")
     else:
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Keine Divera Rics angegeben. Mitteilung wird nicht versendet.")
+        logger.info("Keine Divera Rics angegeben. Mitteilung wird nicht versendet.")
 
 def main():
     config = load_config()
@@ -100,6 +104,7 @@ def main():
     message_titel = "Änderung Fahrzeugstatus!"
     url = f"https://app.divera247.com/api/v2/pull/vehicle-status?accesskey={api_key}"
 
+    logger.info("Skript gestartet.")
     # Status jeder ID speichern
     status_dict = config.get("status_dict", {})
 
@@ -115,6 +120,7 @@ def main():
                 # Wenn die ID noch nicht im status_dict ist, füge sie hinzu
                 if id not in status_dict:
                     status_dict[id] = fmsstatus
+                    logger.info("ID wurde hinzugefügt. Aktueller status_dict:", status_dict)
                     print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | ID wurde hinzugefügt. Aktueller status_dict:", status_dict)
                 else:
                     # Wenn sich der Status von 6 auf != 6 oder von !=6 auf 6 ändert, sende eine E-Mail und aktualisiere den Status
@@ -129,7 +135,7 @@ def main():
                             # E-Mail senden
                             send_email(message, sender_email, receiver_emails, password, smtp_server, smtp_port)
                         else:
-                            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Keine Empfänger-E-Mail-Adressen angegeben. E-Mail wird nicht versendet.")
+                            logger.info("Keine Empfänger-E-Mail-Adressen angegeben. E-Mail wird nicht versendet.")
                         # Pushnachricht senden
                         send_push(message_titel, message, api_key,message_users_fremdschluessel,message_rics)
                     # Aktualisiere den Status für die ID
@@ -140,8 +146,7 @@ def main():
         save_config(config)
 
     except Exception as e:
-        print(f"Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Fehler beim Abrufen der Daten oder beim Senden der E-Mail:", e)
-
+        logger.error("Fehler beim Abrufen der Daten oder beim Senden der E-Mail:", e)
 if __name__ == "__main__":
     main()
-    print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Script erfolgreich ausgeführt!")
+    logger.info("Script erfolgreich ausgeführt!")
