@@ -25,7 +25,7 @@ def load_config():
         print("        \"reciver1@example.de\",")
         print("        \"reciver2@example.de\"")
         print("    ],")
-        print("    \"message_users\": \"22053,22054\",")
+        print("    \"message_users_fremdschluessel\": \"1000,1001\",")
         print("    \"message_rics\": \"22,23\",")
         print("    \"status_dict\": {")
         print("        ")
@@ -60,35 +60,37 @@ def send_email(content, sender_email, receiver_emails, password, smtp_server, sm
         # E-Mail senden
         text = msg.as_string()
         server.sendmail(sender_email, receiver_emails, text)
-        print(f"E-Mail erfolgreich gesendet! Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | E-Mail erfolgreich gesendet!")
     except smtplib.SMTPAuthenticationError as auth_error:
-        print(f"Fehler: Authentifizierung fehlgeschlagen. Stelle sicher, dass Benutzername und Passwort korrekt sind. Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print("Details:", auth_error)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Fehler: Authentifizierung fehlgeschlagen. Stelle sicher, dass Benutzername und Passwort korrekt sind.")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Details:", auth_error)
     except smtplib.SMTPException as smtp_error:
-        print(f"Fehler beim Senden der E-Mail. Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print("Details:", smtp_error)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Fehler beim Senden der E-Mail.")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Details:", smtp_error)
     except Exception as e:
-        print(f"Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Ein allgemeiner Fehler ist aufgetreten:", e)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Ein allgemeiner Fehler ist aufgetreten:", e)
     finally:
         if 'server' in locals():
             server.quit()
 
-def push(message_titel, message_text, api_key, message_users, message_rics):
-    if message_users != "":
-        message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&person={message_users}&accesskey={api_key}"
-        urllib.request.urlopen(message_url)
+def push(message_titel, message_text, api_key, message_users_fremdschluessel, message_rics):
+    if message_users_fremdschluessel != "":
+        message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&person={message_users_fremdschluessel}&accesskey={api_key}"
+        #urllib.request.urlopen(message_url)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Mitteilung erfolgreich versendet.")
     else:
-        print("Keine Divera User angegeben. Push wird nicht versendet.")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Keine Divera User angegeben. Mitteilung wird nicht versendet.")
     if message_rics != "":
         message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&ric={message_rics}&accesskey={api_key}"
-        urllib.request.urlopen(message_url)
+        #urllib.request.urlopen(message_url)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Mitteilung erfolgreich versendet.")
     else:
-        print("Keine Divera Rics angegeben. Push wird nicht versendet.")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Keine Divera Rics angegeben. Mitteilung wird nicht versendet.")
 
 def main():
     config = load_config()
     api_key = config["api_key"]
-    message_users = config["message_users"]
+    message_users_fremdschluessel = config["message_users_fremdschluessel"]
     message_rics = config["message_rics"]
     sender_email = config["sender_email"]
     receiver_emails = config["receiver_emails"]
@@ -113,7 +115,7 @@ def main():
                 # Wenn die ID noch nicht im status_dict ist, füge sie hinzu
                 if id not in status_dict:
                     status_dict[id] = fmsstatus
-                    print("ID wurde hinzugefügt. Aktueller status_dict:", status_dict)
+                    print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | ID wurde hinzugefügt. Aktueller status_dict:", status_dict)
                 else:
                     # Wenn sich der Status von 6 auf 2 oder von 2 auf 6 ändert, sende eine E-Mail und aktualisiere den Status
                     if (status_dict[id] == 6 and fmsstatus != 6) or (status_dict[id] != 6 and fmsstatus == 6):
@@ -127,9 +129,9 @@ def main():
                             # E-Mail senden
                             send_email(message, sender_email, receiver_emails, password, smtp_server, smtp_port)
                         else:
-                            print("Keine Empfänger-E-Mail-Adressen angegeben. E-Mail wird nicht versendet.")
+                            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Keine Empfänger-E-Mail-Adressen angegeben. E-Mail wird nicht versendet.")
                         # Pushnachricht senden
-                        push(message_titel, message, api_key,message_users,message_rics)
+                        push(message_titel, message, api_key,message_users_fremdschluessel,message_rics)
                     # Aktualisiere den Status für die ID
                     status_dict[id] = fmsstatus
 
@@ -142,4 +144,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print(f"Script erfolgreich ausgeführt! Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Script erfolgreich ausgeführt!")

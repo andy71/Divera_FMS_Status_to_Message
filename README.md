@@ -1,8 +1,8 @@
-# Divera FMS Status per Email senden bei Wechsel von ungleich 6 -> 6 oder 6 -> ungleich 6.
+# Divera FMS Status per Email oder Divera 24/7 Mitteilung senden bei Wechsel von ungleich 6 -> 6 oder 6 -> ungleich 6.
 
-Dieses Python Script sendet eine Email an eine Empfängerliste wenn der Status sich von ungleich 6 -> 6 oder 6 -> ungleich 6 ändert.
+Dieses Script sendet eine Email oder eine Divera Mitteilung an eine E-Mail Empfängerliste, eine User Fremdschlüssel Liste oder eine RIC Liste wenn der Status sich von ungleich 6 -> 6 oder von 6 -> ungleich 6 ändert.
 
-Bitte kopiert euch die config-example.json zu config.json und passt die Parameter an.
+Kopiert die config-example.json zu config.json und passt die Beispiel Parameter an.
 
 Beispiel Config:
 
@@ -17,11 +17,12 @@ Beispiel Config:
         "reciver1@example.de",
         "reciver2@example.de"
     ],
+    "message_users_fremdschluessel": "1000",
+    "message_rics": "",
     "status_dict": {
     }
 }
 
-
-Der Cronjob zum starten alle 5 Minuten könnte so aussehen:
-# Alle 5 Min prüfen ob sich ein Fahrzeug Status geändert hat
+## Der Cronjob zum starten könnte so aussehen (contab -e):
+Alle 5 Min prüfen ob sich ein Fahrzeug Status geändert hat
 */5 * * * * /usr/bin/python3 /home/pi/Divera_FMS/main.py >> /home/pi/Divera_FMS/log.txt 2>&1

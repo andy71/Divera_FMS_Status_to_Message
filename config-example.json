@@ -9,8 +9,8 @@
         "reciver1@example.de",
         "reciver2@example.de"
     ],
-    "message_users": "22053,22055",
-    "message_rics": "99,98,97",
+    "message_users_fremdschluessel": "1000",
+    "message_rics": "",
     "status_dict": {
 
     }
