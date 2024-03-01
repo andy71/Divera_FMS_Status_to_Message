@@ -76,13 +76,13 @@ def send_email(content, sender_email, receiver_emails, password, smtp_server, sm
 def push(message_titel, message_text, api_key, message_users_fremdschluessel, message_rics):
     if message_users_fremdschluessel != "":
         message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&person={message_users_fremdschluessel}&accesskey={api_key}"
-        #urllib.request.urlopen(message_url)
+        urllib.request.urlopen(message_url)
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Mitteilung erfolgreich versendet.")
     else:
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Keine Divera User angegeben. Mitteilung wird nicht versendet.")
     if message_rics != "":
         message_url = f"https://app.divera247.com/api/news?title={urllib.parse.quote(message_titel)}&text={urllib.parse.quote(message_text)}&ric={message_rics}&accesskey={api_key}"
-        #urllib.request.urlopen(message_url)
+        urllib.request.urlopen(message_url)
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Mitteilung erfolgreich versendet.")
     else:
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Keine Divera Rics angegeben. Mitteilung wird nicht versendet.")
@@ -117,7 +117,7 @@ def main():
                     status_dict[id] = fmsstatus
                     print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | ID wurde hinzugefügt. Aktueller status_dict:", status_dict)
                 else:
-                    # Wenn sich der Status von 6 auf 2 oder von 2 auf 6 ändert, sende eine E-Mail und aktualisiere den Status
+                    # Wenn sich der Status von 6 auf != 6 oder von !=6 auf 6 ändert, sende eine E-Mail und aktualisiere den Status
                     if (status_dict[id] == 6 and fmsstatus != 6) or (status_dict[id] != 6 and fmsstatus == 6):
                         if status_dict[id] == 6:
                             message = f"Ein Fahrzeug ({shortname}) ist jetzt wieder einsatzbereit. \nID: {id},\n Fahrzeugname: {fullname},\n Kurzname: {shortname},\n FMS Status: {fmsstatus}\n"
