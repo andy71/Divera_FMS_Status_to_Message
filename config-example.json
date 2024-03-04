@@ -1,16 +1,7 @@
 {
     "_comment": "Diese Datei bitte kopieren und entsprechend anpassen bzw. ausfüllen. STATUS_DICT nicht ändern. Anschließend die datei in config.json umbenennen!",
     "api_key": "YOUR-API-KEY",
-    "sender_email": "sender@example.de",
-    "email_password": "YOUR-EMAIL-PASSWORD",
-    "smtp_server": "smtp.gmail.com",
-    "smtp_port": 465,
-    "receiver_emails": [
-        "reciver1@example.de",
-        "reciver2@example.de"
-    ],
-    "message_users_fremdschluessel": "1000",
-    "message_rics": "",
+    "message_users_fremdschluessel": "1000,1001",
     "status_dict": {
 
     }
