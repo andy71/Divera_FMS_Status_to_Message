@@ -73,9 +73,7 @@ def send_push_v2(shortname, message_text, api_key, message_users_fremdschluessel
                 "ts_archive": ts_archive,
                 "cluster": [],
                 "group": [],
-                "user_cluster_relation": [
-                    message_users_fremdschluessel
-                ]
+                "user_cluster_relation": message_users_fremdschluessel
             },
             "instructions": {
                 "user_cluster_relation": {
