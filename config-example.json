@@ -1,6 +1,7 @@
 {
     "_comment": "Diese Datei bitte kopieren und entsprechend anpassen bzw. ausfüllen. STATUS_DICT nicht ändern. Anschließend die datei in config.json umbenennen!",
     "api_key": "YOUR-API-KEY",
+    "StatusLogFile": "vehicle_status.log",
     "message_users_fremdschluessel": ["1000", "1001"],
     "autoarchive_days": 0,
     "autoarchive_hours": 0,

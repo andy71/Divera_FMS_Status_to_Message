@@ -21,8 +21,12 @@ Kopiert die config-example.json zu config.json und passt die Beispiel Parameter 
     "status_dict": {}
 }
 ```
-Die "autoarchive_*-Einträge sind optional.
-Sie können beliebig kombiniert und genutzt werden um die Mitteilung automatisch archivieren zu lassen.
+Die "autoarchive_*-Einträge ebenso wie der Eintrag "StatusLogFile" sind optional.
+
+Die "autoarchive_*-Einträge können beliebig kombiniert und genutzt werden um die Mitteilung automatisch archivieren zu lassen.
+
+Wenn ein StatusLogFile angegeben wird, werden darin die Statusänderungen aufgezeichnet.
+Der Pfad dafür kann relativ zum Scriptpfad sein oder ein absoluter Pfad.
 
 # Cronjob
 Der Cronjob zum Starten könnte so aussehen (contab -e):

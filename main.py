@@ -20,6 +20,7 @@ def load_config():
         logger.info('Ein Beispiel für die Konfigurationsdatei könnte wie folgt aussehen:')
         logger.info('{')
         logger.info('    "api_key": "YOUR-API-KEY",')
+        logger.info('    "StatusLogFile": "vehicle_status.log",')
         logger.info('    "message_users_fremdschluessel": ["1000","1001"],')
         logger.info('    "autoarchive_days": 0,')
         logger.info('    "autoarchive_hours": 0,')
@@ -27,8 +28,10 @@ def load_config():
         logger.info('    "autoarchive_seconds": 0,')
         logger.info('    "status_dict": {}')
         logger.info('}')
-        logger.info('Die "autoarchive_*-Einträge sind optional.')
-        logger.info('Sie können beliebig kombiniert und genutzt werden um die Mitteilung automatisch archivieren zu lassen.')
+        logger.info('Die "autoarchive_*-Einträge ebenso wie der Eintrag "StatusLogFile" sind optional.')
+        logger.info('Die "autoarchive_*-Einträge können beliebig kombiniert und genutzt werden um die Mitteilung automatisch archivieren zu lassen.')
+        logger.info('Wenn ein StatusLogFile angegeben wird, werden darin die Statusänderungen aufgezeichnet.')
+        logger.info('Der Pfad dafür kann relativ zum Scriptpfad sein oder ein absoluter Pfad.')
         exit(1)  # Beenden des Skripts mit Fehlercode 1
     with open(CONFIG_FILE) as f:
         config = json.load(f)
@@ -119,6 +122,15 @@ def main():
     else:
         autoarchive_seconds = 0
 
+    if 'StatusLogFile' in config:
+        if os.path.isabs(config['StatusLogFile']):
+            StatusLogFile = config['StatusLogFile']
+        else:
+            StatusLogFile = os.path.join(current_directory, config['StatusLogFile'])
+        StatusLogFile = os.path.abspath(StatusLogFile)
+    else:
+        StatusLogFile = None
+    
     url = f"https://app.divera247.com/api/v2/pull/all?accesskey={api_key}"
 
     logger.info("Script gestartet.")
@@ -151,6 +163,10 @@ def main():
                         message += f"Neuer Status (seit {vehicle_state_change_dt}): {fms_states['items'][str(fmsstatus)]['name']} ({fmsstatus})\n"
                         if (lat and lng):
                             message += f"\nPosition: {lat}, {lng}"
+
+                        if StatusLogFile:
+                            with open(StatusLogFile, 'w') as log:
+                                log.write(f"{vehicle_state_change_dt} - {name} - {fmsstatus}\n")
 
                         # Pushnachricht senden
                         send_push_v2(
