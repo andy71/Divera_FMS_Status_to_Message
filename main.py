@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 current_directory = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(current_directory, 'config.json')
 
+
 def load_config():
     if not os.path.exists(CONFIG_FILE):
         logger.error(f'Die Konfigurationsdatei "{CONFIG_FILE}" existiert nicht.')
@@ -32,17 +33,36 @@ def load_config():
         logger.info('Die "autoarchive_*-Einträge können beliebig kombiniert und genutzt werden um die Mitteilung automatisch archivieren zu lassen.')
         logger.info('Wenn ein StatusLogFile angegeben wird, werden darin die Statusänderungen aufgezeichnet.')
         logger.info('Der Pfad dafür kann relativ zum Scriptpfad sein oder ein absoluter Pfad.')
+        logger.info('Statt des Eintrags "message_users_fremdschluessel" kann auch "message_groups_title" genutzt werden')
+        logger.info('um eine Gruppenbezeichnung anzugeben.')
+        logger.info('    "message_groups_title": ["Ortsbrandmeister", "Gerätewarte"],')
+        logger.info('Es dürfen aber immer nur Gruppen oder nur Benutzer eingetragen werden, niemals beides.')
         exit(1)  # Beenden des Skripts mit Fehlercode 1
     with open(CONFIG_FILE) as f:
         config = json.load(f)
     return config
 
+
 def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
         json.dump(config, f, indent=4)
 
-def send_push_v2(shortname, message_text, api_key, message_users_fremdschluessel, lat=0, lng=0, autoarchive_days=0, autoarchive_hours=0, autoarchive_minutes=0, autoarchive_seconds=0):
-    if message_users_fremdschluessel != "":
+
+def send_push_v2(
+    shortname,
+    message_text,
+    api_key,
+    message_users_fremdschluessel,
+    message_groups_title,
+    lat=0, lng=0,
+    autoarchive_days=0, autoarchive_hours=0, autoarchive_minutes=0, autoarchive_seconds=0
+):
+    if message_users_fremdschluessel or message_groups_title:
+        if message_users_fremdschluessel:
+            notification_type = 4
+        elif message_groups_title:
+            notification_type = 3
+
         if (autoarchive_days or autoarchive_hours or autoarchive_minutes or autoarchive_seconds):
             archive = True
             ts_archive = int(time.time())
@@ -54,7 +74,7 @@ def send_push_v2(shortname, message_text, api_key, message_users_fremdschluessel
             archive = False
             ts_archive = ''
 
-        body={
+        body = {
             "News": {
                 "title": "Änderung Fahrzeugstatus " + shortname + "!",
                 "text": message_text,
@@ -63,7 +83,7 @@ def send_push_v2(shortname, message_text, api_key, message_users_fremdschluessel
                 "lng": lng,
                 "survey": False,
                 "private_mode": True,
-                "notification_type": 4,
+                "notification_type": notification_type,
                 "send_push": True,
                 "send_sms": False,
                 "send_call": False,
@@ -72,10 +92,13 @@ def send_push_v2(shortname, message_text, api_key, message_users_fremdschluessel
                 "archive": archive,
                 "ts_archive": ts_archive,
                 "cluster": [],
-                "group": [],
+                "group": message_groups_title,
                 "user_cluster_relation": message_users_fremdschluessel
             },
             "instructions": {
+                "group": {
+                    "mapping": "title"
+                },
                 "user_cluster_relation": {
                     "mapping": "foreign_id"
                 }
@@ -99,22 +122,41 @@ def send_push_v2(shortname, message_text, api_key, message_users_fremdschluessel
     else:
         logger.info("Keine Divera User angegeben. Mitteilung wird nicht versendet.")
 
+
 def main():
     config = load_config()
     api_key = config["api_key"]
-    message_users_fremdschluessel = config["message_users_fremdschluessel"]
+
+    if 'message_users_fremdschluessel' in config:
+        message_users_fremdschluessel = config["message_users_fremdschluessel"]
+    else:
+        message_users_fremdschluessel = []
+
+    if 'message_groups_title' in config:
+        message_groups_title = config["message_groups_title"]
+    else:
+        message_groups_title = []
+
+    if (message_users_fremdschluessel and message_groups_title):
+        logger.error('Fehler in der Konfiguration:')
+        logger.error('Es können entweder nur Gruppen oder nur Benutzer als Empfänger angegeben werden.')
+        exit(1)
+
     if 'autoarchive_days' in config:
         autoarchive_days = config['autoarchive_days']
     else:
         autoarchive_days = 0
+
     if 'autoarchive_hours' in config:
         autoarchive_hours = config['autoarchive_hours']
     else:
         autoarchive_hours = 0
+
     if 'autoarchive_minutes' in config:
         autoarchive_minutes = config['autoarchive_minutes']
     else:
         autoarchive_minutes = 0
+
     if 'autoarchive_seconds' in config:
         autoarchive_seconds = config['autoarchive_seconds']
     else:
@@ -128,7 +170,7 @@ def main():
         StatusLogFile = os.path.abspath(StatusLogFile)
     else:
         StatusLogFile = None
-    
+
     url = f"https://app.divera247.com/api/v2/pull/all?accesskey={api_key}"
 
     logger.info("Script gestartet.")
@@ -146,8 +188,8 @@ def main():
                 name = item["name"]
                 shortname = item["shortname"]
                 fmsstatus = item["fmsstatus_id"]
-                lat= item["lat"]
-                lng= item["lng"]
+                lat = item["lat"]
+                lng = item["lng"]
                 vehicle_state_change_dt = datetime.fromtimestamp(item["fmsstatus_ts"]).strftime('%Y-%m-%d %H:%M:%S')
 
                 # Wenn die ID noch nicht im status_dict ist, füge sie hinzu
@@ -163,15 +205,16 @@ def main():
                             message += f"\nPosition: {lat}, {lng}"
 
                         if StatusLogFile:
-                            with open(StatusLogFile, 'w') as log:
+                            with open(StatusLogFile, 'a') as log:
                                 log.write(f"{vehicle_state_change_dt} - {name} - {fmsstatus}\n")
 
                         # Pushnachricht senden
                         send_push_v2(
-                            shortname,
-                            message,
-                            api_key,
-                            message_users_fremdschluessel,
+                            shortname=shortname,
+                            message_text=message,
+                            api_key=api_key,
+                            message_users_fremdschluessel=message_users_fremdschluessel,
+                            message_groups_title=message_groups_title,
                             lat=lat,
                             lng=lng,
                             autoarchive_days=autoarchive_days,
@@ -187,6 +230,7 @@ def main():
         save_config(config)
     except Exception as e:
         logger.error("Fehler beim Abrufen der Daten:\n", e)
+
 
 if __name__ == "__main__":
     try:

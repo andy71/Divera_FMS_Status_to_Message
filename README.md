@@ -28,6 +28,12 @@ Die "autoarchive_*-Einträge können beliebig kombiniert und genutzt werden um d
 Wenn ein StatusLogFile angegeben wird, werden darin die Statusänderungen aufgezeichnet.
 Der Pfad dafür kann relativ zum Scriptpfad sein oder ein absoluter Pfad.
 
+Statt des Eintrags "message_users_fremdschluessel" kann auch "message_groups_title" genutzt werden um eine Gruppenbezeichnung anzugeben.
+
+```    "message_groups_title": ["Ortsbrandmeister", "Gerätewarte"],')```
+
+Es dürfen aber immer nur Gruppen oder nur Benutzer eingetragen werden, niemals beides.')
+
 # Cronjob
 Der Cronjob zum Starten könnte so aussehen (contab -e):
 
