@@ -32,7 +32,7 @@ Statt des Eintrags "message_users_fremdschluessel" kann auch "message_groups_tit
 
 ```    "message_groups_title": ["Ortsbrandmeister", "Gerätewarte"],```
 
-Es dürfen aber immer nur Gruppen oder nur Benutzer eingetragen werden, niemals beides.')
+Es dürfen aber immer nur Gruppen oder nur Benutzer eingetragen werden, niemals beides.
 
 # Cronjob
 Der Cronjob zum Starten könnte so aussehen (contab -e):
