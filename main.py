@@ -112,7 +112,6 @@ def send_push_v2(
             req.add_header('Content-Type', 'application/json; charset=utf-8')
             jsondataasbytes = json.dumps(body).encode('utf-8')
             req.add_header('Content-Length', len(jsondataasbytes))
-            print("foo")
             response = urllib.request.urlopen(req, jsondataasbytes)
             logger.info("Mitteilung erfolgreich versendet.")
             logger.info(response.read())
