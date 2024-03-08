@@ -104,8 +104,8 @@ def send_push_v2(
                 }
             }
         }
-        logger.debug(json.dumps(body, indent=4))
-
+        logger.info(json.dumps(body, indent=4))
+        quit()
         message_url = f"https://app.divera247.com/api/v2/news?accesskey={api_key}"
         try:
             req = urllib.request.Request(message_url)
@@ -201,7 +201,7 @@ def main():
                         message = f"Status von Fahrzeug wurde geändert.\nFahrzeugname: {name}\nKurzname: {shortname}\n"
                         message += f"Neuer Status (seit {vehicle_state_change_dt}): {fms_states['items'][str(fmsstatus)]['name']} ({fmsstatus})\n"
                         if (lat and lng):
-                            message += f"\nPosition: {lat}, {lng}"
+                            message += f"\nPosition:\nhttps://www.google.com/maps/place/{lat},{lng}\n"
 
                         if StatusLogFile:
                             with open(StatusLogFile, 'a') as log:
