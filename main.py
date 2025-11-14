@@ -135,7 +135,7 @@ def send_push_v2(
             }
         }
         logger.info(json.dumps(body, indent=4))
-        sys.exit()  # ToDo: zu Testzwecken wird hier beendet
+        #sys.exit()  # ToDo: zu Testzwecken wird hier beendet
         message_url = f'https://app.divera247.com/api/v2/news?accesskey={config["api_key"]}'
         try:
             req = urllib.request.Request(message_url)
